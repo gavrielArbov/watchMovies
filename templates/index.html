@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body class="bg-secondary"> 
+   
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand text-success" href="#">MoviesVOD</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/home/1">Popular</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
+              Genres
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              {% for genre in genres %}
+                <a class="dropdown-item" href="/genre/{{genre["id"]}}/1">{{genre["name"]}}</a>
+              {% endfor %}
+            </div>
+          </li>
+          <li class="nav-item">
+            {% if my_session %}
+              <a class="nav-link" href="/favorites">Favorites</a>
+            {% else %}
+              <a class="nav-link disabled">Favorites</a>
+            {% endif %}
+          </li>
+        </ul>
+
+        <div class="search-content form-inline my-3 my-lg-1">
+          <input name="keyword" class="form-control mr-2" type="text" placeholder="Search" aria-label="Search" class="bi bi-search">
+          <button onclick="searchMovie()" class="btn btn-outline-primary mr-4" type="submit">Search</button>
+        </div>
+
+        {% if not my_session %}
+        <form action="/signup">
+          <button class="btn btn-outline-success mr-2" type="submit">Sign Up</button>
+        </form>
+        <form action="/signin">
+          <button class="btn btn-success" type="submit">Sign In</button>
+        </form>
+        {% endif %}
+
+        {% if my_session %}
+          <h4 class="text-light mr-3" >{{my_session["user"]["username"]}}</h4>
+          <form action="/signout">
+            <button class="btn btn-success" type="submit">Sign Out</button>
+          </form>
+        {% endif %}
+      </div>
+    </nav>
+
+
+  <div class="card-deck container-fluid justify-content-center">
+      {% for movie in content %}
+          <div class="card bg-secondary m-2" style="min-width: 12rem; max-width: 12rem; min-height: fit-content; max-height: fit-content;">
+              <a target="_blank" href="/movie/{{movie["title"]}}"><img class="card-img-top" src="https://image.tmdb.org/t/p/w220_and_h330_face/{{movie["poster_path"]}}"></a></img>
+              <div class="card-body bg-dark row-lg-1" >
+                  <h8 class="text-light card-title">{{movie["title"]}}</h8>
+                  <p class="text-secondary card-text">
+                      {% if movie["release_date"]: %}
+                          {{movie["release_date"].split("-")[0]}}
+                      {% endif %}
+                  </p>
+
+              </div>
+
+              <div class="card-footer" >
+                {% if my_session %}
+                  <a href="/addmovie/{{movie}}" class="text-primary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-plus-circle-fill " viewBox="0 0 16 16">
+                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>     
+                      </svg>
+                  </a>
+                {% else %}
+                  <a href="#" class="text-primary disabled">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-plus-circle-fill " viewBox="0 0 16 16">
+                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>     
+                     </svg>
+                 </a>
+                {% endif %} 
+                  <a href="#" class="text-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+                    </svg>
+                  </a>
+
+              </div>
+          </div>
+      {% endfor %}
+  </div>
+
+  <nav class="navbar-dark">
+      <ul class="pagination justify-content-center bg-secondary">
+        {% if page > 1 %}
+          <li class="page-item enabled ">
+            <a class="page-link" href="{{href_prefix}}/{{page-1}}" tabindex="-1">Previous</a>
+          </li>
+        {% else %}
+        <li class="page-item disabled ">
+          <a class="page-link" href="#" tabindex="-1">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if page > 2 %}
+          <li class="page-item"><a class="page-link " href="{{href_prefix}}/1">{{1}}</a></li>
+        {% endif %}
+
+        {% if page > 1 %}
+          <li class="page-item"><a class="page-link " href="{{href_prefix}}/{{page-1}}">{{page-1}}</a></li>
+        {% endif %}
+
+        <li class="page-item active"><a class="page-link" href="{{href_prefix}}/{{page}}">{{page}}</a></li>
+        {% if total_pages > 1 and page < total_pages %}
+          <li class="page-item"><a class="page-link" href="{{href_prefix}}/{{page+1}}">{{page+1}}</a></li>
+        {% endif %}
+
+        {% if total_pages > 2 and page < total_pages-1 %}
+          <li class="page-item"><a class="page-link " href="{{href_prefix}}/{{total_pages}}">{{total_pages}}</a></li>
+        {% endif %}
+
+        {% if page < total_pages %}
+          <li class="page-item enabled">
+            <a class="page-link " href="{{href_prefix}}/{{page+1}}">Next</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <a class="page-link " href="#">Next</a>
+          </li>
+        {% endif %}
+
+
+      </ul>
+  </nav>
+  
+</body>
+{% endblock %}
